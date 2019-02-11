@@ -1,10 +1,4 @@
-# Setup local
-
-Then run
-
-```
-kubectl proxy --port=8080 --address='0.0.0.0' --disable-filter=true &
-```
+# Setup local
 
 ## Dockr for mac
 
@@ -13,33 +7,34 @@ kubectl proxy --port=8080 --address='0.0.0.0' --disable-filter=true &
 
 ```
 brew install kubernetes-cli
+kubectl config use-context docker-for-desktop
 kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended/kubernetes-dashboard.yaml
-kubectl get pod --namespace=kube-system | grep dashboard
-kubectl port-forward kubernetes-dashboard-669f9bbd46-qj26h 8443:8443 --namespace=kube-system
+kubectl get pod --namespace=kube-system | grep dashboard | awk '{print $1}'
+kubectl port-forward $(kubectl get pod --namespace=kube-system | grep dashboard | awk '{print $1}') 8443:8443 --namespace=kube-system
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret |grep replicaset | awk '{print $1}')
 ```
 
 Then copy the JTW output and use as login in this page:
 
 ```
-http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
+https://localhost:8443
 ```
 
 Launch service
 
 ```
-kubectl destroy -f sa-frontend-pod.yaml
+kubectl apply -f sa-frontend-pod.yaml
 kubectl port-forward sa-frontend 8009:80
 ```
 
 Service should be visible on http://127.0.0.1:8009
 
-## Attempt to scale manually (wrong way)
+## Attempt to scale manually (wrong way)
 
 ```
 kubectl apply -f sa-frontend-pod.yaml
 kubectl apply -f sa-frontend-pod2.yaml
-kubectl get pod -l app=sa-frontend # --show-labels
+kubectl get pod -l app=sa-frontend # --show-labels
 ```
 
 ```
@@ -47,7 +42,7 @@ kubectl apply -f service-sa-frontend-lb.yaml
 kubectl describe services sa-frontend-lb
 ```
 
-## Scale deploy (correct way)
+## Scale deploy (correct way)
 
 ```
 kubectl apply -f sa-frontend-deployment.yaml
