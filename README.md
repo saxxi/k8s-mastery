@@ -1,6 +1,8 @@
 # Setup local
 
-## Dockr for mac
+## Kubernetes locally
+
+### Dockr for mac
 
 1) Open `Docker for Mac` -> `Preferences` -> `Enable K8s` (if you get an error go to `Preferences` -> `reset` -> `reset cluster`)
 2) Install `kubernetes-cli` & `Kubernetes dashboard`
@@ -29,7 +31,7 @@ kubectl port-forward sa-frontend 8009:80
 
 Service should be visible on http://127.0.0.1:8009
 
-## Attempt to scale manually (wrong way)
+### Attempt to scale manually (wrong way)
 
 ```
 kubectl apply -f sa-frontend-pod.yaml
@@ -42,11 +44,31 @@ kubectl apply -f service-sa-frontend-lb.yaml
 kubectl describe services sa-frontend-lb
 ```
 
-## Scale deploy (correct way)
+### Scale deploy (correct way)
 
 ```
 kubectl apply -f sa-frontend-deployment.yaml
 ```
+
+## K8s
+
+Install ingress
+
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
+kubectl get pods --all-namespaces -l app.kubernetes.io/name=ingress-nginx --watch
+```
+
+```
+brew install kubernetes-helm
+helm repo update
+helm init --wait # open rule if behind firewall
+helm install stable/traefik --set dashboard.enabled=true,dashboard.domain=dashboard.localhost
+```
+
+
+
 
 
 ## Test Docker

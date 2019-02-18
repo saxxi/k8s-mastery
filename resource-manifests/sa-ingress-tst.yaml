@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-admin
+  name: ambassador-admin
+spec:
+  type: NodePort
+  ports:
+  - name: ambassador-admin
+    port: 8877
+    targetPort: 80
+  selector:
+    service: nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador
+  name: ambassador
+spec:
+  type: LoadBalancer
+  ports:
+  - name: ambassador
+    port: 8898
+    targetPort: 80
+  selector:
+    service: ambassador
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ambassador-depl
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - image: rinormaloku/sentiment-analysis-frontend
+          name: sa-frontend
+          ports:
+            - containerPort: 80
+      restartPolicy: Always
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ambassador-depl
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: ambassador-depl
+    spec:
+      containers:
+        - image: rinormaloku/sentiment-analysis-frontend
+          imagePullPolicy: Always
+          name: ambassador-depl
+          ports:
+            - containerPort: 80
